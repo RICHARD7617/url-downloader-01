@@ -3,13 +3,17 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: URL Downloader API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: downloads
+    description: Video download operations
+  - name: admin
+    description: Owner panel operations
 paths:
   /healthz:
     get:
@@ -24,6 +28,141 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /downloads:
+    post:
+      operationId: createDownload
+      tags: [downloads]
+      summary: Download a video
+      description: Download a video from a social media URL
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDownloadBody"
+      responses:
+        "200":
+          description: Download started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DownloadResult"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /downloads/stats:
+    get:
+      operationId: getDownloadStats
+      tags: [downloads]
+      summary: Get download statistics
+      description: Get public download statistics
+      responses:
+        "200":
+          description: Statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DownloadStats"
+
+  /admin/verify:
+    post:
+      operationId: verifyAdminPin
+      tags: [admin]
+      summary: Verify admin PIN
+      description: Verify the owner panel PIN
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminPinBody"
+      responses:
+        "200":
+          description: PIN verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminVerifyResult"
+        "401":
+          description: Invalid PIN
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /admin/dashboard:
+    get:
+      operationId: getAdminDashboard
+      tags: [admin]
+      summary: Get admin dashboard data
+      description: Get full dashboard data for the owner panel
+      parameters:
+        - in: query
+          name: pin
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Dashboard data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminDashboard"
+        "401":
+          description: Invalid PIN
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /admin/downloads:
+    get:
+      operationId: listAdminDownloads
+      tags: [admin]
+      summary: List all downloads
+      description: List all download records for admin view
+      parameters:
+        - in: query
+          name: pin
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: List of downloads
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminDownloadsList"
+        "401":
+          description: Invalid PIN
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +173,180 @@ components:
       required:
         - status
 
+    CreateDownloadBody:
+      type: object
+      properties:
+        url:
+          type: string
+          description: The social media video URL to download
+        platform:
+          type: string
+          enum: [tiktok, instagram, facebook, youtube, twitter]
+          description: The social media platform
+        userIp:
+          type: string
+          description: User IP for tracking (optional)
+      required:
+        - url
+        - platform
+
+    DownloadResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+        downloadUrl:
+          type: string
+          description: Direct URL to download the video
+        filename:
+          type: string
+          description: Suggested filename
+        platform:
+          type: string
+        quality:
+          type: string
+          description: Video quality (HD, etc.)
+        title:
+          type: string
+          description: Video title if available
+        thumbnail:
+          type: string
+          description: Thumbnail URL
+        downloadId:
+          type: integer
+          description: ID of the download record
+      required:
+        - success
+        - downloadUrl
+        - filename
+        - platform
+        - quality
+
+    DownloadStats:
+      type: object
+      properties:
+        totalDownloads:
+          type: integer
+        totalUsers:
+          type: integer
+        byPlatform:
+          type: object
+          additionalProperties:
+            type: integer
+      required:
+        - totalDownloads
+        - totalUsers
+        - byPlatform
+
+    AdminPinBody:
+      type: object
+      properties:
+        pin:
+          type: string
+      required:
+        - pin
+
+    AdminVerifyResult:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        message:
+          type: string
+      required:
+        - valid
+        - message
+
+    AdminDashboard:
+      type: object
+      properties:
+        totalDownloads:
+          type: integer
+        totalUsers:
+          type: integer
+        todayDownloads:
+          type: integer
+        byPlatform:
+          type: object
+          additionalProperties:
+            type: integer
+        recentDownloads:
+          type: array
+          items:
+            $ref: "#/components/schemas/DownloadRecord"
+        dailyStats:
+          type: array
+          items:
+            $ref: "#/components/schemas/DailyStat"
+      required:
+        - totalDownloads
+        - totalUsers
+        - todayDownloads
+        - byPlatform
+        - recentDownloads
+        - dailyStats
+
+    AdminDownloadsList:
+      type: object
+      properties:
+        downloads:
+          type: array
+          items:
+            $ref: "#/components/schemas/DownloadRecord"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+      required:
+        - downloads
+        - total
+        - page
+        - limit
+
+    DownloadRecord:
+      type: object
+      properties:
+        id:
+          type: integer
+        url:
+          type: string
+        platform:
+          type: string
+        userIp:
+          type: string
+        createdAt:
+          type: string
+        filename:
+          type: string
+        success:
+          type: boolean
+      required:
+        - id
+        - url
+        - platform
+        - createdAt
+        - success
+
+    DailyStat:
+      type: object
+      properties:
+        date:
+          type: string
+        count:
+          type: integer
+      required:
+        - date
+        - count
+
+    ApiError:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+      required:
+        - error
+        - message
