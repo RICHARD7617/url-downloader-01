@@ -127,7 +127,7 @@ export default function Home() {
       {/* Header */}
       <header className="w-full p-6 flex flex-col items-center justify-center space-y-4 pt-16 z-10">
         <div className="flex items-center gap-3">
-          <h1 className="text-4xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-purple-900 to-gray-800">
+          <h1 className="text-4xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 via-orange-500 to-yellow-300">
             SPICE-TECH DOWNLOADER
           </h1>
         </div>
