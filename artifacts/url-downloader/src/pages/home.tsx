@@ -118,7 +118,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-[100dvh] w-full bg-background text-foreground flex flex-col relative overflow-hidden dark">
+    <div className="animated-bg min-h-[100dvh] w-full text-white flex flex-col relative overflow-hidden dark">
       {/* Decorative Background Elements */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/20 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-[#E1306C]/20 blur-[120px] pointer-events-none" />
@@ -171,7 +171,7 @@ export default function Home() {
                 >
                   <Icon className="drop-shadow-[0_0_10px_currentColor]" />
                 </div>
-                <span className={`text-sm font-semibold transition-colors ${isSelected ? 'text-gray-900' : 'text-muted-foreground group-hover:text-gray-700'}`}>
+                <span className={`text-sm font-semibold transition-colors ${isSelected ? 'text-white' : 'text-muted-foreground group-hover:text-gray-300'}`}>
                   {p.name}
                 </span>
               </button>
@@ -190,7 +190,7 @@ export default function Home() {
                 placeholder={selectedPlatform ? `Paste ${platforms.find(p => p.id === selectedPlatform)?.name} URL here...` : "Select a platform and paste URL..."}
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                className="flex-1 h-14 text-lg bg-background/40 border-border/60 focus-visible:ring-primary/60 text-foreground placeholder:text-muted-foreground"
+                className="flex-1 h-14 text-lg bg-white/10 border-white/10 focus-visible:ring-primary/50 text-white placeholder:text-gray-400"
               />
               <Button 
                 size="lg" 
@@ -281,9 +281,9 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="w-full py-8 border-t border-border/50 bg-background/80 backdrop-blur-md relative z-10">
+      <footer className="w-full py-8 border-t border-white/10 bg-black/20 backdrop-blur-md relative z-10">
         <div className="container mx-auto px-4 flex flex-col items-center justify-center space-y-4">
-          <div className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer" onClick={() => setIsAdminModalOpen(true)}>
+          <div className="flex items-center gap-2 text-white/60 hover:text-white transition-colors cursor-pointer" onClick={() => setIsAdminModalOpen(true)}>
             <FaCrown className="text-primary" />
             <span className="font-medium tracking-wide">Made by His Excellency</span>
           </div>
