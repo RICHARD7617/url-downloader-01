@@ -1,0 +1,11 @@
+{
+  "buildCommand": "pnpm install && pnpm --filter @workspace/url-downloader run build",
+  "outputDirectory": "artifacts/url-downloader/dist/public",
+  "installCommand": "pnpm install",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "env": {
+    "BASE_PATH": "/"
+  }
+}
