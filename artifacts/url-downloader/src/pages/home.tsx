@@ -1,4 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt(): Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+}
 import { FaTiktok, FaInstagram, FaFacebook, FaYoutube, FaXTwitter, FaWhatsapp, FaBolt, FaLock, FaCrown, FaDownload } from "react-icons/fa6";
 import { useCreateDownload, useGetDownloadStats, getGetDownloadStatsQueryKey, useVerifyAdminPin, useGetAdminDashboard, getGetAdminDashboardQueryKey, useListAdminDownloads } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
@@ -32,6 +37,26 @@ export default function Home() {
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
   const [pin, setPin] = useState("");
   const [adminPin, setAdminPin] = useState<string | null>(null);
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [appInstalled, setAppInstalled] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setInstallPrompt(e as BeforeInstallPromptEvent);
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+    window.addEventListener("appinstalled", () => setAppInstalled(true));
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
+  const handleInstall = async () => {
+    if (!installPrompt) return;
+    await installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === "accepted") setAppInstalled(true);
+    setInstallPrompt(null);
+  };
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -276,6 +301,19 @@ export default function Home() {
               <FaWhatsapp className="mr-2 text-xl" /> Contact His Excellency
             </Button>
           </a>
+
+          {/* PWA Install Button */}
+          {installPrompt && !appInstalled && (
+            <Button
+              onClick={handleInstall}
+              className="shiny-btn bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 font-bold rounded-full px-8 h-12 shadow-[0_4px_24px_rgba(251,191,36,0.45)] border-0"
+            >
+              <FaDownload className="mr-2 text-lg" /> Download App
+            </Button>
+          )}
+          {appInstalled && (
+            <p className="text-green-400 text-sm font-medium">App installed successfully!</p>
+          )}
         </div>
 
       </main>
